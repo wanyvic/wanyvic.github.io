@@ -64,7 +64,7 @@ source <(curl -sL https://raw.githubusercontent.com/wanyvic/one-key-ikev2-vpn/ma
 ### 2.3. 配置 ikev2密码
 ```
 vim /usr/local/etc/ipsec.secrets
-```
+```  
 
 ## 3. trojan-go
 ### 3.1. 安装Jrohy的一键trojan面板脚本
@@ -85,7 +85,7 @@ trojan
 ### 3.4. 更改trojan-go配置文件以支持websocket
 ```
 vim /usr/local/etc/trojan/config.json
-```
+```  
 ```
 #在mysql后面追加
 "websocket": {
