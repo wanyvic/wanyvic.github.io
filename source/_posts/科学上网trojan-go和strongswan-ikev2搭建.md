@@ -58,13 +58,16 @@ cp -f $ca_file ca.cert.pem
 ### 2.2. 安装 strongswan
 ```
 source <(curl -sL https://raw.githubusercontent.com/wanyvic/one-key-ikev2-vpn/master/one-key-ikev2.sh)
-```  
+```
+
 提示: Would you want to import existing cert? You NEED copy your cert file to the same directory of this script 选 `yes`
 
 ### 2.3. 配置 ikev2密码
+
 ```
 vim /usr/local/etc/ipsec.secrets
-```  
+```
+
 
 ## 3. trojan-go
 ### 3.1. 安装Jrohy的一键trojan面板脚本
@@ -83,9 +86,12 @@ trojan
 6
 ```
 ### 3.4. 更改trojan-go配置文件以支持websocket
+
+
 ```
 vim /usr/local/etc/trojan/config.json
-```  
+``` 
+
 ```
 #在mysql后面追加
 "websocket": {
@@ -99,6 +105,7 @@ vim /usr/local/etc/trojan/config.json
         "idle_timeout": 60
     }
 ```
+
 ```
 trojan restart # 重启trojan
 ```
