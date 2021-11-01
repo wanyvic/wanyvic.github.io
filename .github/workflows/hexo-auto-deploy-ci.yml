@@ -1,0 +1,77 @@
+name: Hexo Auto Deploy CI
+
+on:
+  push:
+    branches: [main]
+env:
+  GIT_USER: wanyvic
+  GIT_EMAIL: q873040807@gmial.com
+
+jobs:
+  deploy-github-pages:
+    name: Deploy on github pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: "npm"
+      - name: Configuration environment
+        env:
+          HEXO_DEPLOY_KEY_PRI: ${{secrets.HEXO_DEPLOY_KEY_PRI}}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$HEXO_DEPLOY_KEY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Change Website name
+        run: sed -i "s~wanyvic.cn~wanyvic.github.io~" _config.yml
+      - name: Deploy blog
+        run: |
+          npm run clean
+          npm run deploy
+  deploy-websites:
+    name: Deploy on Websites
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: "npm"
+      - name: Configuration environment
+        env:
+          HEXO_DEPLOY_KEY_PRI: ${{secrets.HEXO_DEPLOY_KEY_PRI}}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$HEXO_DEPLOY_KEY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Change Website name
+        run: sed -i "s~wanyvic.cn~wanyvic.cn~" _config.yml
+      - name: Generate blog
+        run: |
+          npm run clean
+          npm run build
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@5.1
+        with:
+          switches: -avzr --delete
+          path: public/
+          remote_path: ${{ secrets.DEPLOY_PATH }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.HEXO_DEPLOY_KEY_PRI }}
