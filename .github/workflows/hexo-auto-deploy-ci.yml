@@ -32,7 +32,10 @@ jobs:
         run: |
           npm install
       - name: Change Website name
-        run: sed -i "s~wanyvic.cn~wanyvic.github.io~" _config.yml
+        run: |
+          sed -i "s~wanyvic.cn~wanyvic.github.io~" _config.yml
+          sed -i "s~google_site_verification:~google_site_verification: l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM~" themes/next/_config.yml
+          sed -i "s~baidu_site_verification:~baidu_site_verification: code-XQEfkj505K~" themes/next/_config.yml
       - name: Deploy blog
         run: |
           npm run clean
@@ -61,7 +64,8 @@ jobs:
         run: |
           npm install
       - name: Change Website name
-        run: sed -i "s~wanyvic.cn~wanyvic.cn~" _config.yml
+        run: |
+          sed -i "s~wanyvic.cn~wanyvic.cn~" _config.yml
       - name: Generate blog
         run: |
           npm run clean
