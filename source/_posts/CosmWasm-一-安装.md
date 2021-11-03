@@ -1,5 +1,6 @@
 ---
 title: CosmWasm 一 安装
+abbrlink: e627dad1
 date: 2021-11-02 16:22:39
 tags:
 categories:
