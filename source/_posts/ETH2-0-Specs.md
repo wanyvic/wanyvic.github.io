@@ -1,9 +1,6 @@
 ---
 title: ETH2.0 Specs
-tags:
-  - ETH2.0
-  - Casper
-  - 区块链
+tags: [ETH2.0, Casper, 区块链]
 categories: 区块链
 abbrlink: 8a7d387
 date: 2021-10-24 17:53:11

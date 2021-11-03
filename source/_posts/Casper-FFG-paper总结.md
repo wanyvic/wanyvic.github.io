@@ -2,7 +2,8 @@
 title: Casper FFG paper总结
 abbrlink: 3830d322
 date: 2021-10-26 14:52:49
-tags:
+tags: [PoS, 区块链 capser]
+categories: [区块链]
 ---
 # 介绍
 权益证明设计有两个主要的思想流派：

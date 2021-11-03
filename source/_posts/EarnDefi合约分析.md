@@ -2,7 +2,8 @@
 title: EarnDefi被盗分析
 abbrlink: 28567f46
 date: 2021-10-31 13:45:08
-tags:
+categories: [区块链]
+tags: [earndefi, 区块链]
 ---
 
 # Earn Defi 单币挖矿合约架构

@@ -2,8 +2,8 @@
 title: filecoin的元数据证明和lurk
 abbrlink: a537129b
 date: 2021-11-03 01:27:56
-tags:
-categories:
+tags: [filecoin, Lurk]
+categories: [区块链]
 copyright:
 ---
 # Lurk

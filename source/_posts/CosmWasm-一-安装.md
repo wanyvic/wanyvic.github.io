@@ -2,8 +2,8 @@
 title: CosmWasm 一 安装
 abbrlink: e627dad1
 date: 2021-11-02 16:22:39
-tags:
-categories:
+tags: [wasm, cosmos, 区块链]
+categories: [区块链]
 copyright:
 ---
 # rust安装省略

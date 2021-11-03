@@ -1,9 +1,8 @@
 ---
 title: 在确定性系统实现随机数-Randao机制
-tags:
-  - randao
-  - eth 区块链
 abbrlink: 408d5eb7
+tags: [randao, eth, 区块链]
+categories: [区块链]
 date: 2021-10-24 18:39:19
 ---
 # 问题

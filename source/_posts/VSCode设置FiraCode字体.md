@@ -2,7 +2,7 @@
 title: VSCode设置FiraCode字体
 abbrlink: '12238235'
 date: 2021-09-28 15:04:19
-tags: 工具
+tags: [工具, vscode]
 ---
 ## VSCode设置FiraCode字体
 1. 进入FiraCode的[Github仓库](https://github.com/tonsky/FiraCode?_pjax=%23js-repo-pjax-container)下载字体
