@@ -67,6 +67,8 @@ jobs:
       - name: Change Website name
         run: |
           sed -i "s~wanyvic.cn~wanyvic.cn~" _config.yml
+          sed -i "s~google_site_verification:~google_site_verification: p2vb_RbH95FxWtlFsxqhgFQxqQZL1_1bqtBWpvXt0YI~" themes/next/_config.yml
+          sed -i "s~baidu_site_verification:~baidu_site_verification: code-npqjZBvNyb~" themes/next/_config.yml
       - name: Generate blog
         run: |
           npm run clean

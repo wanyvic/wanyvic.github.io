@@ -2,7 +2,7 @@
 title: Casper FFG paper总结
 abbrlink: 3830d322
 date: 2021-10-26 14:52:49
-tags: [PoS, 区块链 capser]
+tags: [PoS, 区块链, capser]
 categories: [区块链]
 ---
 # 介绍

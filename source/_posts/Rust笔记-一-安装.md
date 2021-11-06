@@ -54,3 +54,28 @@ cargo test
 ```bash
 cargo check
 ```
+
+### panic 中断
+`Cargo.toml`
+```toml
+[profile.release]
+panic = 'abort'
+```
+
+## 使用外部package
+在 Cargo.toml的
+`[dependencies]` 添加package
+
+## cargo 换源
+`.cargo/config`
+```toml
+[source.crates-io]
+registry = "https://github.com/rust-lang/crates.io-index"
+
+replace-with = 'tuna'
+[source.tuna]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"
+
+[net]
+git-fetch-with-cli = true
+```
