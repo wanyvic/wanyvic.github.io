@@ -34,9 +34,9 @@ jobs:
       - name: Change Website name
         run: |
           sed -i "s~wanyvic.cn~wanyvic.github.io~" _config.yml
-          sed -i "s~google_site_verification:~google_site_verification: l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM~" themes/next/_config.yml
-          sed -i "s~baidu_site_verification:~baidu_site_verification: code-XQEfkj505K~" themes/next/_config.yml
-          sed -i ':a;N;$!ba;s/beian:\n    enable: true/beian:\n    enable: false/' themes/next/_config.yml
+          sed -i "s~google_site_verification:~google_site_verification: l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM~" _config.next.yml
+          sed -i "s~baidu_site_verification:~baidu_site_verification: code-XQEfkj505K~" _config.next.yml
+          sed -i ':a;N;$!ba;s/beian:\n    enable: true/beian:\n    enable: false/' _config.next.yml
       - name: Deploy blog
         run: |
           npm run clean
@@ -67,8 +67,8 @@ jobs:
       - name: Change Website name
         run: |
           sed -i "s~wanyvic.cn~wanyvic.cn~" _config.yml
-          sed -i "s~google_site_verification:~google_site_verification: p2vb_RbH95FxWtlFsxqhgFQxqQZL1_1bqtBWpvXt0YI~" themes/next/_config.yml
-          sed -i "s~baidu_site_verification:~baidu_site_verification: code-npqjZBvNyb~" themes/next/_config.yml
+          sed -i "s~google_site_verification:~google_site_verification: p2vb_RbH95FxWtlFsxqhgFQxqQZL1_1bqtBWpvXt0YI~" _config.next.yml
+          sed -i "s~baidu_site_verification:~baidu_site_verification: code-npqjZBvNyb~" _config.next.yml
       - name: Generate blog
         run: |
           npm run clean
