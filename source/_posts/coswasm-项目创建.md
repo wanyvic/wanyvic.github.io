@@ -30,6 +30,6 @@ cargo generate --git https://github.com/CosmWasm/cw-template.git --name PROJECT_
 cargo generate --git https://github.com/CosmWasm/cw-template.git --branch <version> --name PROJECT_NAME
 ```
 Example:
-```
+```bash
 cargo generate --git https://github.com/CosmWasm/cw-template.git --branch 0.16 --name PROJECT_NAME
 ```
