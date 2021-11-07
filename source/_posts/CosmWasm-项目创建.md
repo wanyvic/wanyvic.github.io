@@ -1,12 +1,12 @@
 ---
-title: coswasm 项目创建
+title: CosmWasm 项目创建
 tags:
   - wasm
   - cosmos
   - 区块链
 categories:
   - 区块链
-abbrlink: 4a05f127
+abbrlink: b2bb0ade
 date: 2021-11-05 17:09:52
 updated: 2021-11-05 17:09:52
 copyright:
