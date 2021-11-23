@@ -1,5 +1,5 @@
 ---
-title: CosmWasm 项目创建
+title: CosmWasm 二 项目创建
 tags:
   - wasm
   - cosmos
@@ -33,3 +33,4 @@ Example:
 ```bash
 cargo generate --git https://github.com/CosmWasm/cw-template.git --branch 0.16 --name PROJECT_NAME
 ```
+
