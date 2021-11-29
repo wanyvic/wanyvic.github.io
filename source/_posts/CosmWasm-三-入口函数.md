@@ -1,12 +1,12 @@
 ---
-title: coswasm 三 入口函数
+title: CosmWasm 三 入口函数
 tags:
   - wasm
   - cosmos
   - 区块链
 categories:
   - 区块链
-abbrlink: ddae9710
+abbrlink: 5671ab14
 date: 2021-11-23 16:50:41
 updated: 2021-11-23 16:50:41
 copyright:
