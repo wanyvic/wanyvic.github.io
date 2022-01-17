@@ -1,5 +1,6 @@
 ---
 title: Star-Atlas、Fancy-Birds和DefiKingdoms 分析
+abbrlink: 1b44cf2e
 date: 2022-01-12 13:57:00
 updated: 2022-01-12 13:57:00
 tags:
