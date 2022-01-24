@@ -126,3 +126,4 @@ dApp 智能合约的角色发生了变化——从负责执行昂贵的业务逻
 > https://eprint.iacr.org/2021/1063.pdf  
 > https://www.jianshu.com/p/6ce113baa464  
 > https://ethfans.org/posts/on-the-road-to-starknet-a-permissionless-stark-powered-l2-zk-rollup
+> https://www.ise.tu-berlin.de/fileadmin/fg308/publications/2018/Off-chaining_Models_and_Approaches_to_Off-chain_Computations.pdf
