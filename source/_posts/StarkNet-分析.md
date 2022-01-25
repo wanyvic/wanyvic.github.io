@@ -66,8 +66,8 @@ StarkNet 发展的最后一步是实现去中心化运营。
 STARK 是一个证明系统。
 
 **复杂度：**
-- 证明者时空复杂度：O(nlogn) 准线性
-- 见证长度和验证时间：O(log_{2}n) 亚线性
+- 证明者时空复杂度：$O(n\log{}n)$ 准线性
+- 见证长度和验证时间：$O(log_{2}n)$ 亚线性
 
 在没有Cairo之前我们需要对每个问题都去创建特殊的代数中间件（arithmetic intermediate representation, AIR）。Cairo相当于建立了一个通用的AIR，类似ASIC->CPU的转换。
 
