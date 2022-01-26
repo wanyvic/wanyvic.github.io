@@ -159,4 +159,4 @@ markdown:
     typographer: true
     quotes: '“”‘’'
   plugins:
-    - markdown-it-katex
+    - '@traptitech/markdown-it-katex'
