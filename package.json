@@ -12,6 +12,7 @@
     "version": "5.4.0"
   },
   "dependencies": {
+    "@traptitech/markdown-it-katex": "^3.5.0",
     "@waline/hexo-next": "^2.0.6",
     "animate.css": "^4.1.1",
     "hexo": "^5.4.1",
@@ -33,7 +34,6 @@
     "hexo-theme-landscape": "^0.0.3",
     "hexo-theme-next": "^8.9.0",
     "hexo-word-counter": "0.0.3",
-    "markdown-it-katex": "^2.0.3",
     "prism-themes": "^1.9.0"
   },
   "devDependencies": {
