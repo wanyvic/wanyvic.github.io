@@ -1,8 +1,8 @@
 ---
-title: 零知识证明 三 zkSNARK 构建
-abbrlink: '59736367'
+title: 零知识证明 三 zkSNARK R1CS->QAP
+abbrlink: 45c3b13b
 date: 2022-01-26 12:49:42
-updated: 2022-01-26 12:49:42
+updated: 2022-01-27 11:49:43
 tags:
 categories:
 copyright:
@@ -10,6 +10,11 @@ copyright:
 
 # 开篇提示
 本文是基于V神[Quadratic Arithmetic Programs: from Zero to Hero](https://vitalik.ca/general/2016/12/10/qap.html)与网友分析基础之上总结而成。
+
+zkSNARK过程：  
+![](零知识证明-三-zkSNARK-R1CS-QAP/f3.png)
+
+本篇只讲前半部分。
 
 # NP问题与NPC问题
 
@@ -30,9 +35,9 @@ def qeval(x):
 我们这里所使用的特殊的程序语言支持基本算术运算 ($+,-,*,/$)，常量阶指数运算(如：可以计算 $x^7$ 但是不能计算 $x^y$ )和变量赋值，理论上可以在这个语言中做任意计算（只要计算步骤的次数是受限制的，此外，不允许循环）。注意，这个语言不支持模运算 ($\%$) 和比较运算 ($<, >, <=, >=$)，但是通过提供辅助输入可以扩展到支持这两种运算，此处我们不做展开。
 
 # 扁平化
-然后，我们把代码拍平(Flattening)：
+然后，我们把代码拍平(Flattening)转换为代数线路(algebraic circuit)：
 
-拍平后的代码一次只能做下面的一种事情，x=y（x可以是数字或变量）。x=y op z（其中op可以是$+，-，*，/$等运算）
+拍平后的代码一次只能做下面的一种简单运算，x=y（x可以是数字或变量）。x=y op z（其中op可以是$+,-,*,/$等运算）
 
 $
 sym\_1 = x * x
@@ -47,8 +52,8 @@ $
 out = sym\_2 + 5
 $
 
-在上面的过程中，我们引入了一些中间变量，但是整体跟我们的代码是等价的。
-# 构建R1CS
+在上面的过程中，我们引入了一些中间变量，但是整体跟我们原来的的代码是等价的。
+# 通往 R1CS 的大门
 
 接下来，我们需要把拍平的代码写成一个叫作R1CS（rank-1 constraint system）的约束系统。
 
@@ -106,7 +111,7 @@ $\vec{c} = [0,0,0,0,1,0]$
 ### 第三门逻辑电路
 $sym\_2=y+x$，满足$<\vec{s},\vec{a}>*<\vec{s},\vec{b}>-<\vec{s},\vec{c}>=0$成立的$(\vec{a},\vec{b},\vec{c})$为：
  
-因为是加法所以这里解法有些不同：  
+因为是加法所以这里做法有些不同（实际转化为$sym\_2=(y+x)*1$）：  
 $\vec{a} = [0,1,0,0,1,0]$  
 $\vec{b} = [1,0,0,0,0,0]$  
 $\vec{c} = [0,0,0,0,0,1]$
@@ -144,13 +149,14 @@ $[0, 0, 0, 0, 0, 1]$
 $[0, 0, 1, 0, 0, 0]$  
 
 # R1CS to QAP
-下一步是将这个 R1CS 转换成 QAP 形式，因为有6个变量，所以要对每个变量进行约束，因为有4个逻辑门所以每个多项式有4个点。它实现了完全相同的逻辑，只是使用了多项式而不是点积。
-通过使用**拉格朗日插值公式**或**快速傅里叶逆变换**来将4组长度为6的三个向量转换为3组6个3次多项式。
+下一步是将这个 R1CS 转换成 QAP 形式。它实现了完全相同的逻辑，只是使用了多项式而不是点积。
+
+通过使用**拉格朗日插值**或**快速傅里叶逆变换**来将4组长度为6的三个向量转换为3组6个3次多项式。
 
 具体作法：
-从每个a向量中取出第一个值，用拉格兰奇插值来构造一个多项式(在 i 处的多项式得到 i 的第一个值)
+从每个a向量中取出一个值，用拉格朗日插值来构造一个多项式(在 i 处的多项式得到 i 的第一个值)
 
-从第一列得到$(1,0),(2,0),(3,0),(4,5)$使用这5个点用拉格朗日插值构造多项式，以此类推。
+从第一列得到$(1,0),(2,0),(3,0),(4,5)$使用这4个点用拉格朗日插值构造多项式，以此类推。
 
 最后得到多项式
 
@@ -220,7 +226,7 @@ $
 
 与其单一检查R1CS的约束不如对多项式进行点积同时来检查所有的约束。
 
-![](零知识证明-三-zkSNARK-构建/f2.png)
+![](零知识证明-三-zkSNARK-R1CS-QAP/f2.png)
 
 例如当$x=1$时：  
 $A(1)=1*(-5)+3*8+35*0+9*(-6)+27*4+30*(-1)=43$  
@@ -236,13 +242,19 @@ $A(2)=1*9.166+3*(-11.333)+35*0+9*9.5+27*(-7)+30*1.833=-73.333$
 
 $t=[-88.0, 592.666, -1063.777, 805.833, -294.777, 51.5, -3.444]$
 
-[$Z =(x-1)(x-2)(x-3)(x-4)= [24,-50,35,-10,1]$](https://www.symbolab.com/solver/vector-dot-product-calculator/%5Cleft(x%20-%201%5Cright)%20%5Ccdot%20%5Cleft(x%20-%202%5Cright)%20%5Ccdot%20%5Cleft(x%20-%203%5Cright)%20%5Ccdot%20%5Cleft(x%20-%204%5Cright))
+Z定义为$(x-1)(x-2)(x-3)...$在对应于逻辑门的所有点处为零的最简单多项式。代数的一个基本事实是，任何在所有这些点上都等于 0 的多项式必须是这个最小多项式的倍数。即Z应该为t的因式。
 
-[$H = t/z = [-3.666,17.055,-3.444]$](https://www.wolframalpha.com/widget/widgetPopup.jsp?p=v&id=330407de24ae45cf5e6ae7c814f1f459&title=Dividing%20Polynomials%20Calculator&theme=blue&i0=-(3%2B4/9)*x%5E6%2B51.5*x%5E5-(294%2B7/9)*x%5E4%2B(805%2B5/6)*x%5E3-(1063%2B7/9)*x%5E2%2B(592%2B2/3)*x-88&i1=x%5E4-10x%5E3%2B35x%5E2-50x%2B24&podSelect=&includepodid=Input&includepodid=QuotientAndRemainder&podstate=QuotientAndRemainder__Step-by-step%20solution&showAssumptions=1&showWarnings=1)
+计算：
+
+[$Z =(x-1)(x-2)(x-3)(x-4)=[24,-50,35,-10,1]$](https://www.symbolab.com/solver/vector-dot-product-calculator/%5Cleft(x%20-%201%5Cright)%20%5Ccdot%20%5Cleft(x%20-%202%5Cright)%20%5Ccdot%20%5Cleft(x%20-%203%5Cright)%20%5Ccdot%20%5Cleft(x%20-%204%5Cright))
+
+[$H = t/Z = [-3.666,17.055,-3.444]$](https://www.wolframalpha.com/widget/widgetPopup.jsp?p=v&id=330407de24ae45cf5e6ae7c814f1f459&title=Dividing%20Polynomials%20Calculator&theme=blue&i0=-(3%2B4/9)*x%5E6%2B51.5*x%5E5-(294%2B7/9)*x%5E4%2B(805%2B5/6)*x%5E3-(1063%2B7/9)*x%5E2%2B(592%2B2/3)*x-88&i1=x%5E4-10x%5E3%2B35x%5E2-50x%2B24&podSelect=&includepodid=Input&includepodid=QuotientAndRemainder&podstate=QuotientAndRemainder__Step-by-step%20solution&showAssumptions=1&showWarnings=1) (wolframalpha 计算有误差)
 
 精确值：$H = t/z = -\frac{31}{9}x^2+\frac{307}{18}x-\frac{66}{18}$
 
-即：t可被z整除。
+即：t可被Z整除。即Z为t的因式。
+
+如果我们试图伪造 R1CS 解决方案中的任何变量。则t不会是Z的倍数。
 
 # 参考资料
 > https://james-christopher-ray.medium.com/here-are-the-calculations-for-the-product-of-a-b-and-c-with-s-ae6a3f94647a  
