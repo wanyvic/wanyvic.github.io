@@ -4,7 +4,10 @@ abbrlink: 45c3b13b
 date: 2022-01-26 12:49:42
 updated: 2022-01-27 11:49:43
 tags:
+  - 零知识证明
+  - 区块链
 categories:
+  - 区块链
 copyright:
 ---
 

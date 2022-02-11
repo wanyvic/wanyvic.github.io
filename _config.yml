@@ -99,7 +99,6 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-# theme: landscape
 theme: next
 
 # Deployment
@@ -111,10 +110,10 @@ deploy:
 
 # Search 
 search:
-  path: ./public/search.xml
+  path: search.xml
   field: post
+  content: true
   format: html
-  limit: 10000
 
 # Post meta display settings
 post_meta:
@@ -144,13 +143,19 @@ abbrlink:
   alg: crc32  #support crc16(default) and crc32
   rep: hex    #support dec(default) and hex
 
-baidusitemap:
-  path: baidusitemap.xml
 sitemap:
   path: sitemap.xml
+  rel: false
+  tags: true
+  categories: true
 
 # config of hexo-renderer-markdown-it
 markdown:
+  anchors :
+    level : 1
+    permalink: true
+    permalinkClass: header-anchor
+    permalinkSymbol: ' '
   render:
     html: true
     xhtmlOut: false
