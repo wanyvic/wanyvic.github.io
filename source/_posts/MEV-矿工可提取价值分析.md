@@ -4,7 +4,11 @@ abbrlink: 60c92d46
 date: 2022-03-10 15:24:55
 updated: 2022-03-10 15:24:55
 tags:
+  - MEV
+  - 零知识证明
+  - 矿工可提取价值
 categories:
+  - 区块链
 copyright:
 ---
 
