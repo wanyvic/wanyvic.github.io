@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/corgi_32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/corgi_16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM">
+  <meta name="baidu-site-verification" content="code-XQEfkj505K">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"wanyvic.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="三明治攻击案例分析   抢跑阶段  Mev bot在uniswap-v2上卖出ETH买入NCR。 再将买入的NCR在uniswap-v3上卖出，买入USDC。引起USDC在uniswap-v3的NCR-USDC LP池中升值抬高了接下来受害者交易的成本。（其他池不受影响）   https:&#x2F;&#x2F;etherscan.io&#x2F;tx&#x2F;0xc6d53c38434effa63fdf3b763759b1fa96">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MEV 套利 flashbots">
+<meta property="og:url" content="https://wanyvic.github.io/posts/c0c0fef6/index.html">
+<meta property="og:site_name" content="Wanyvicの博客">
+<meta property="og:description" content="三明治攻击案例分析   抢跑阶段  Mev bot在uniswap-v2上卖出ETH买入NCR。 再将买入的NCR在uniswap-v3上卖出，买入USDC。引起USDC在uniswap-v3的NCR-USDC LP池中升值抬高了接下来受害者交易的成本。（其他池不受影响）   https:&#x2F;&#x2F;etherscan.io&#x2F;tx&#x2F;0xc6d53c38434effa63fdf3b763759b1fa96">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-0.jpg">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-1.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-2.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-3.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-4.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-5.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-6.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-7.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-8.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-9.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-10.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-11.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-12.png">
+<meta property="article:published_time" content="2022-04-14T11:05:25.000Z">
+<meta property="article:modified_time" content="2022-04-14T11:05:25.000Z">
+<meta property="article:author" content="wanyvic">
+<meta property="article:tag" content="MEV">
+<meta property="article:tag" content="flashbots">
+<meta property="article:tag" content="矿工可提取价值">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wanyvic.github.io/posts/c0c0fef6/mev-0.jpg">
+
+
+<link rel="canonical" href="https://wanyvic.github.io/posts/c0c0fef6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://wanyvic.github.io/posts/c0c0fef6/","path":"posts/c0c0fef6/","title":"MEV 套利 flashbots"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MEV 套利 flashbots | Wanyvicの博客</title>
+  
+
+
+
+
+<link rel="dns-prefetch" href="https://waline-kappa-three.vercel.app"><link rel="stylesheet" type="text/css" href="/css/injector/main.css" /><link rel="preload" as="style" href="/css/injector/light.css" /><link rel="preload" as="style" href="/css/injector/dark.css" />
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Wanyvicの博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">区块链攻城狮</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">49</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">42</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E6%98%8E%E6%B2%BB%E6%94%BB%E5%87%BB%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">三明治攻击案例分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%A2%E8%B7%91%E9%98%B6%E6%AE%B5"><span class="nav-number">1.1.</span> <span class="nav-text">抢跑阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%97%E5%AE%B3%E8%80%85%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.2.</span> <span class="nav-text">受害者行为</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%BE%E9%9A%8F%E9%98%B6%E6%AE%B5"><span class="nav-number">1.3.</span> <span class="nav-text">尾随阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%9B%8A%E5%88%86%E6%9E%90"><span class="nav-number">1.4.</span> <span class="nav-text">利益分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uniswap%E5%85%AC%E5%BC%8F"><span class="nav-number">1.5.</span> <span class="nav-text">uniswap公式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flashbots-Auction"><span class="nav-number">2.</span> <span class="nav-text">Flashbots Auction</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">技术架构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%90%AC%E7%A0%96%E5%A5%97%E5%88%A9"><span class="nav-number">3.</span> <span class="nav-text">搬砖套利</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E5%85%B7%E4%BD%93%E8%BF%87%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">案例具体过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%9B%8A%E5%88%86%E6%9E%90-2"><span class="nav-number">3.2.</span> <span class="nav-text">利益分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E6%90%AC%E7%A0%96%E5%A5%97%E5%88%A9%E7%A8%8B%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">简单的搬砖套利程序</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">具体流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%B8%8D%E8%B6%B3%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">4.2.</span> <span class="nav-text">项目不足的地方</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B"><span class="nav-number">4.3.</span> <span class="nav-text">改进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E7%BB%93%E6%9E%9C"><span class="nav-number">4.3.1.</span> <span class="nav-text">输出结果</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">5.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wanyvic"
+      src="/images/ProfilePhoto.PNG">
+  <p class="site-author-name" itemprop="name">wanyvic</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanyvic" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wanyvic" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:q873040807@gmail.com" title="E-Mail → mailto:q873040807@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdn.jsdelivr.net/npm/@creativecommons/vocabulary@2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/wanyvic" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wanyvic.github.io/posts/c0c0fef6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ProfilePhoto.PNG">
+      <meta itemprop="name" content="wanyvic">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wanyvicの博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MEV 套利 flashbots
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-14 19:05:25" itemprop="dateCreated datePublished" datetime="2022-04-14T19:05:25+08:00">2022-04-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+    <span class="post-meta-item-icon">
+      <i class="far fa-comment"></i>
+    </span>
+    <span class="post-meta-item-text">Waline：</span>
+  
+    <a title="waline" href="/posts/c0c0fef6/#waline-comments" itemprop="discussionUrl">
+      <span class="post-comments-count waline-comment-count" id="/posts/c0c0fef6/" data-xid="/posts/c0c0fef6/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="三明治攻击案例分析"><a class="header-anchor" href="#三明治攻击案例分析"> </a>三明治攻击案例分析</h1>
+<p><img src="/posts/c0c0fef6/mev-0.jpg" alt></p>
+<h2 id="抢跑阶段"><a class="header-anchor" href="#抢跑阶段"> </a>抢跑阶段</h2>
+<ol>
+<li>Mev bot在uniswap-v2上卖出ETH买入NCR。</li>
+<li>再将买入的NCR在uniswap-v3上卖出，买入USDC。引起USDC在uniswap-v3的NCR-USDC LP池中升值抬高了接下来受害者交易的成本。（其他池不受影响）</li>
+</ol>
+<p><img src="/posts/c0c0fef6/mev-1.png" alt><br>
+<a target="_blank" rel="noopener" href="https://etherscan.io/tx/0xc6d53c38434effa63fdf3b763759b1fa9699219af99c9e5efca53a8bbb44804a">https://etherscan.io/tx/0xc6d53c38434effa63fdf3b763759b1fa9699219af99c9e5efca53a8bbb44804a</a></p>
+<h2 id="受害者行为"><a class="header-anchor" href="#受害者行为"> </a>受害者行为</h2>
+<p>受害者在uniswap-v3用较高的成本上卖出大量NCR，买入USDC。</p>
+<p><img src="/posts/c0c0fef6/mev-2.png" alt><br>
+<a target="_blank" rel="noopener" href="https://etherscan.io/tx/0x88d125526b4a1549108a508663104c643160a349876a576be64a3109dc082576">https://etherscan.io/tx/0x88d125526b4a1549108a508663104c643160a349876a576be64a3109dc082576</a></p>
+<h2 id="尾随阶段"><a class="header-anchor" href="#尾随阶段"> </a>尾随阶段</h2>
+<ol>
+<li>Mev bot在uniswap-v3上卖出USDC买入NCR成功换出更多的NCR。</li>
+<li>再将换出的NCR在uniswap-v2上卖出，换回WETH。</li>
+</ol>
+<p><img src="/posts/c0c0fef6/mev-3.png" alt><br>
+<a target="_blank" rel="noopener" href="https://etherscan.io/tx/0x0f66853c690105c5f3a080ce75d75a04a35bd4eb8618f7878ee7e0e3dd53ab82">https://etherscan.io/tx/0x0f66853c690105c5f3a080ce75d75a04a35bd4eb8618f7878ee7e0e3dd53ab82</a></p>
+<h2 id="利益分析"><a class="header-anchor" href="#利益分析"> </a>利益分析</h2>
+<p>用户损失\Mev Bot毛利润：0.099336744926763451 ether（$303.53）</p>
+<p>Mev Bot净利润（去除矿工费）：0.001781203268032581 ether（$5.44）</p>
+<p>矿工净利润（去除basefee）：0.08727896012374656 ether（$266.69）</p>
+<p>燃烧费用：0.00978678484422912 ether（$29.9）</p>
+<p>在此利益分配中，矿工通过套利交易手续费获取套利总额的97.46%</p>
+<h2 id="uniswap公式"><a class="header-anchor" href="#uniswap公式"> </a>uniswap公式</h2>
+<p><img src="/posts/c0c0fef6/mev-4.png" alt><br>
+<img src="/posts/c0c0fef6/mev-5.png" alt></p>
+<p>最后把<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mn>1</mn><mo>−</mo><mi>ρ</mi></mrow><annotation encoding="application/x-tex">\theta=1-\rho</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ρ</span></span></span></span>（对于uniswap是0.3%）代入公式:</p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>y</mi><mo>=</mo><mo stretchy="false">(</mo><mn>997</mn><mo separator="true">⋅</mo><mi mathvariant="normal">Δ</mi><mi>x</mi><mo separator="true">⋅</mo><mi>y</mi><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>997</mn><mo separator="true">⋅</mo><mi mathvariant="normal">Δ</mi><mi>x</mi><mo>+</mo><mn>1000</mn><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Delta{y}=(997·\Delta{x}·y)/(997·\Delta{x}+1000x)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">997</span><span class="mpunct">⋅</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathnormal">x</span></span><span class="mpunct">⋅</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span><span class="mord">/</span><span class="mopen">(</span><span class="mord">997</span><span class="mpunct">⋅</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">Δ</span><span class="mord"><span class="mord mathnormal">x</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1000</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span></p>
+<p>公式符合UniswapV2Library的getAmountOut函数。</p>
+<p><img src="/posts/c0c0fef6/mev-6.png" alt></p>
+<h1 id="Flashbots-Auction"><a class="header-anchor" href="#Flashbots-Auction"> </a>Flashbots Auction</h1>
+<p>Flashbots Auction提供私人交易池 + 密封投标区块空间拍卖机制，允许区块生产者无需信任地外包寻找最佳区块构建的工作。<br>
+在常规的以太坊交易池中，用户将交易广播到公共点对点网络并指定一个燃料价格，该价格表明他们愿意为以太坊链上的每个计算单元支付多少。矿工收到这些交易，按gas价格排序，并使用贪心算法生成一个区块，试图通过交易费用获得最大价值。<br>
+以下是该机制的关键问题：</p>
+<ul>
+<li>用户为了抢占套利机会，纷纷通过提高gas price，以便抢占第一个套利机会（只有第一笔套利能够成功），在短时间内使gas price巨幅提升，影响网络稳定。</li>
+<li>只有一笔套利交易可以成功，其他的交易均失败，消耗区块链空间。</li>
+<li>恶意用户为了抢占套利机会，这导致了诸如垃圾邮件之类的替代策略来增加获胜的可能性，从而进一步增加无谓损失。<br>
+相反，Flashbots Auction基础设施使用第一价格密封投标拍卖，允许用户私下交流他们的投标和细化交易订单偏好，而无需为失败的投标付费。这种机制最大限度地提高了矿工的收益，同时为给定 MEV机会价值的价格发现提供了一个有效的场所。至关重要的是，这种机制消除了抢先漏洞。</li>
+</ul>
+<h2 id="技术架构"><a class="header-anchor" href="#技术架构"> </a>技术架构</h2>
+<p><img src="/posts/c0c0fef6/mev-7.png" alt><br>
+Flashbots Auction引入了一种新的eth_sendBundleRPC请求，它标准化了通信通道中的消息格式。此消息称为“Flashbots Bundle”。目的是将多笔交易顺序捆绑，竞拍后交由矿工出块。</p>
+<pre class="line-numbers language-js" data-language="js"><code class="language-js"><span class="token punctuation">&#123;</span>
+  <span class="token string-property property">"jsonrpc"</span><span class="token operator">:</span> <span class="token string">"2.0"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"method"</span><span class="token operator">:</span> <span class="token string">"eth_sendBundle"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"params"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">&#123;</span>
+      txs<span class="token punctuation">,</span>               <span class="token comment">// Array[String], A list of signed transactions to execute in an atomic bundle</span>
+      blockNumber<span class="token punctuation">,</span>       <span class="token comment">// String, a hex encoded block number for which this bundle is valid on</span>
+      minTimestamp<span class="token punctuation">,</span>      <span class="token comment">// (Optional) Number, the minimum timestamp for which this bundle is valid, in seconds since the unix epoch</span>
+      maxTimestamp<span class="token punctuation">,</span>      <span class="token comment">// (Optional) Number, the maximum timestamp for which this bundle is valid, in seconds since the unix epoch</span>
+      revertingTxHashes<span class="token punctuation">,</span> <span class="token comment">// (Optional) Array[String], A list of tx hashes that are allowed to revert</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h1 id="搬砖套利"><a class="header-anchor" href="#搬砖套利"> </a>搬砖套利</h1>
+<p>因为DEX各池子的价差，Mev Bot分析后在DEX之间搬砖套利。</p>
+<h2 id="案例具体过程"><a class="header-anchor" href="#案例具体过程"> </a>案例具体过程</h2>
+<ol>
+<li>Mev Bot在sushiswap卖出7.38WETH，买入2698.66 RUNE。</li>
+<li>随后再将买入的2698.66 RUNE在uniswap-v3卖出换成7.70个WETH完成套利。</li>
+</ol>
+<p><img src="/posts/c0c0fef6/mev-8.png" alt><br>
+<a target="_blank" rel="noopener" href="https://etherscan.io/tx/0xa8930ae6a17a679ea5abd4b7274dc27416be5d62379c848ade8779e876986f7b">https://etherscan.io/tx/0xa8930ae6a17a679ea5abd4b7274dc27416be5d62379c848ade8779e876986f7b</a></p>
+<h2 id="利益分析-2"><a class="header-anchor" href="#利益分析-2"> </a>利益分析</h2>
+<p>Mev Bot毛利润：0.329689032623411672 ether（$1021.11）</p>
+<p>Mev Bot净利润：0.314207274249977546 ether（$973.16）</p>
+<p>矿工利润：0.011232792714802698 ether（$34.79）</p>
+<h1 id="简单的搬砖套利程序"><a class="header-anchor" href="#简单的搬砖套利程序"> </a>简单的搬砖套利程序</h1>
+<p>Flashbot提供一个简单的套利工具，用于从两个DEX中相同的LP池套利。<br>
+<a target="_blank" rel="noopener" href="https://github.com/flashbots/simple-arbitrage">https://github.com/flashbots/simple-arbitrage</a></p>
+<h2 id="具体流程"><a class="header-anchor" href="#具体流程"> </a>具体流程</h2>
+<ol>
+<li>获取两个DEX所有LP池的reserves数据。</li>
+<li>计算两个DEX相同的LP池reserves的可套利空间。</li>
+<li>构造交易调用链上部署好的FlashBotsMultiCall合约。</li>
+<li>将交易构建完成，模拟交易，如果成功则构建simulate。</li>
+<li>将simulate发送给flashbots。</li>
+</ol>
+<p><img src="/posts/c0c0fef6/mev-9.png" alt></p>
+<h2 id="项目不足的地方"><a class="header-anchor" href="#项目不足的地方"> </a>项目不足的地方</h2>
+<p>计算最佳收益使用二分搜索的方式，时间复杂度高，并且代码不完善、不精确。</p>
+<p><img src="/posts/c0c0fef6/mev-10.png" alt></p>
+<h2 id="改进"><a class="header-anchor" href="#改进"> </a>改进</h2>
+<p>理论上交叉套利是存在一个最值的，我们可以通过uniswap的公式统一成一个交叉套利的公式，求出最值。此公式论文：<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1911.03380.pdf">https://arxiv.org/pdf/1911.03380.pdf</a><br>
+github上也有大神通过此论文改进了getBestCrossdMarket函数：<a target="_blank" rel="noopener" href="https://github.com/jacksonConrad/better-simple-arbitrage">https://github.com/jacksonConrad/better-simple-arbitrage</a></p>
+<p><img src="/posts/c0c0fef6/mev-11.png" alt></p>
+<h3 id="输出结果"><a class="header-anchor" href="#输出结果"> </a>输出结果</h3>
+<p><img src="/posts/c0c0fef6/mev-12.png" alt></p>
+<h1 id="参考文献"><a class="header-anchor" href="#参考文献"> </a>参考文献</h1>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.cxyzjd.com/article/sanqima/109667469">https://www.cxyzjd.com/article/sanqima/109667469</a><br>
+<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1911.03380.pdf">https://arxiv.org/pdf/1911.03380.pdf</a><br>
+<a target="_blank" rel="noopener" href="https://docs.flashbots.net/flashbots-auction/overview">https://docs.flashbots.net/flashbots-auction/overview</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>wanyvic
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://wanyvic.github.io/posts/c0c0fef6/" title="MEV 套利 flashbots">https://wanyvic.github.io/posts/c0c0fef6/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MEV/" rel="tag"><i class="fa fa-tag"></i> MEV</a>
+              <a href="/tags/flashbots/" rel="tag"><i class="fa fa-tag"></i> flashbots</a>
+              <a href="/tags/%E7%9F%BF%E5%B7%A5%E5%8F%AF%E6%8F%90%E5%8F%96%E4%BB%B7%E5%80%BC/" rel="tag"><i class="fa fa-tag"></i> 矿工可提取价值</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/487c3c24/" rel="prev" title="StarkWare 分析">
+                  <i class="fa fa-chevron-left"></i> StarkWare 分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/aa6d79f4/" rel="next" title="MacOS M1 编译 Qv2ray + Trojan-go + QT6">
+                  MacOS M1 编译 Qv2ray + Trojan-go + QT6 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="waline-comments"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wanyvic</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">113k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:43</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdn.jsdelivr.net/npm/pdfobject@2.2.7/pdfobject.min.js","integrity":"sha256-ph3Dk89VmuTVXG6x/RDzk53SU9LPdAh1tpv0UvnDZ2I="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.13.10/dist/mermaid.min.js","integrity":"sha256-CmZCFVnvol9YL23PfjDflGY5nJwE+Mf/JN+8v+tD/34="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" integrity="sha256-94CNZ/bJtwrBYZrXhCOBvpB4rZUzBnvAsirFv31TMGo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.css" integrity="sha256-+oItviPaTmqjDhk4y4fLLUIMgRQYDV/ZyrRNvQiebWM=" crossorigin="anonymous">
+  <script class="next-config" data-name="katex" type="application/json">{"copy_tex_js":{"url":"https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.js","integrity":"sha256-etSqbSVF4+Lwe8MGk/Vanc1sR+mWv+qOG73fxWw9p94="}}</script>
+  <script src="/js/third-party/math/katex.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.2.0/dist/quicklink.umd.js" integrity="sha256-4kQf9z5ntdQrzsBC3YSHnEz02Z9C1UeW/E9OgnvlzSY=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://wanyvic.github.io/posts/c0c0fef6/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="waline" type="application/json">{"lang":"zh-cn","enable":true,"serverURL":"https://waline-kappa-three.vercel.app","placeholder":"发表评论~","avatar":"wavatar","pageSize":10,"visitor":false,"comment_count":true,"requiredFields":["nick"],"meta":["nick","mail","link"],"libUrl":"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/weibo","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/bilibili","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/qq"],"el":"#waline-comments","path":"/posts/c0c0fef6/"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.waline.el).then(() => 
+    NexT.utils.getScript(CONFIG.waline.libUrl, { condition: window.Waline })
+  ).then(() => {
+    new Waline(CONFIG.waline);
+  });
+});
+</script><div class="moon-menu">
+  <div class="moon-menu-items">
+    
+    <div id="moon-menu-item-back2bottom" class="moon-menu-item" onclick="back2bottom()">
+      <i class='fa fa-chevron-down'></i>    </div>
+    
+    <div id="moon-menu-item-back2top" class="moon-menu-item" onclick="back2top()">
+      <i class='fa fa-chevron-up'></i>    </div>
+    
+  </div>
+  <div class="moon-menu-button">
+    <svg class="moon-menu-bg">
+      <circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle>
+      <circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle>
+    </svg>
+    <div class="moon-menu-content">
+      <div class="moon-menu-icon"><i class='fas fa-ellipsis-v'></i></div>
+      <div class="moon-menu-text"></div>
+    </div>
+  </div>
+</div><script src="/js/injector.js"></script>
+</body>
+</html>

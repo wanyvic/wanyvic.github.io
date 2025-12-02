@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/corgi_32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/corgi_16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM">
+  <meta name="baidu-site-verification" content="code-XQEfkj505K">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"wanyvic.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="什么是MEV MEV是矿工可提取价值（Miner Extractable Value）的缩写。由于区块链并没有要求矿工对交易打包顺序做出强制要求，矿工是可以自主选择对内存池中的待处理交易进行重新排序，由此矿工从用户那里获得了额外的利润，这部分利润价值就被称为MEV。 DeFi的兴起。MEV价值呈指数增长。  浏览器链接：https:&#x2F;&#x2F;explore.flashbots.net&#x2F;  存在的角色">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MEV 矿工可提取价值分析">
+<meta property="og:url" content="https://wanyvic.github.io/posts/60c92d46/index.html">
+<meta property="og:site_name" content="Wanyvicの博客">
+<meta property="og:description" content="什么是MEV MEV是矿工可提取价值（Miner Extractable Value）的缩写。由于区块链并没有要求矿工对交易打包顺序做出强制要求，矿工是可以自主选择对内存池中的待处理交易进行重新排序，由此矿工从用户那里获得了额外的利润，这部分利润价值就被称为MEV。 DeFi的兴起。MEV价值呈指数增长。  浏览器链接：https:&#x2F;&#x2F;explore.flashbots.net&#x2F;  存在的角色">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/MEV%E4%BB%B7%E5%80%BC%E5%9B%BE2.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/memorypool2.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/DEX%E5%A5%97%E5%88%A9%E7%A4%BA%E6%84%8F%E5%9B%BE2.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/flashbots.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/TimeLock1.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/TimeLock2.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/TimeLock3.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/TimeLock4.png">
+<meta property="og:image" content="https://wanyvic.github.io/posts/60c92d46/aexe.png">
+<meta property="article:published_time" content="2022-03-10T07:24:55.000Z">
+<meta property="article:modified_time" content="2022-03-10T07:24:55.000Z">
+<meta property="article:author" content="wanyvic">
+<meta property="article:tag" content="MEV">
+<meta property="article:tag" content="矿工可提取价值">
+<meta property="article:tag" content="零知识证明">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wanyvic.github.io/posts/60c92d46/MEV%E4%BB%B7%E5%80%BC%E5%9B%BE2.png">
+
+
+<link rel="canonical" href="https://wanyvic.github.io/posts/60c92d46/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://wanyvic.github.io/posts/60c92d46/","path":"posts/60c92d46/","title":"MEV 矿工可提取价值分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MEV 矿工可提取价值分析 | Wanyvicの博客</title>
+  
+
+
+
+
+<link rel="dns-prefetch" href="https://waline-kappa-three.vercel.app"><link rel="stylesheet" type="text/css" href="/css/injector/main.css" /><link rel="preload" as="style" href="/css/injector/light.css" /><link rel="preload" as="style" href="/css/injector/dark.css" />
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Wanyvicの博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">区块链攻城狮</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">49</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">42</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFMEV"><span class="nav-number">1.</span> <span class="nav-text">什么是MEV</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%98%E5%9C%A8%E7%9A%84%E8%A7%92%E8%89%B2"><span class="nav-number">2.</span> <span class="nav-text">存在的角色</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9F%BF%E5%B7%A5"><span class="nav-number">2.1.</span> <span class="nav-text">矿工</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A5%97%E5%88%A9%E6%9C%BA%E5%99%A8%E4%BA%BA"><span class="nav-number">2.2.</span> <span class="nav-text">套利机器人</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%A5%97%E5%88%A9"><span class="nav-number">3.</span> <span class="nav-text">如何套利</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%88%A9%E7%9A%84%E5%A5%97%E5%88%A9"><span class="nav-number">3.1.</span> <span class="nav-text">有利的套利</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AC%E7%A0%96%E5%A5%97%E5%88%A9-2"><span class="nav-number">3.1.1.</span> <span class="nav-text">搬砖套利</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%AE%97%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%A5%97%E5%88%A9"><span class="nav-number">3.1.2.</span> <span class="nav-text">清算机器人套利</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%AE%B3%E7%9A%84%E5%A5%97%E5%88%A9"><span class="nav-number">3.2.</span> <span class="nav-text">有害的套利</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E6%98%8E%E6%B2%BB%E6%94%BB%E5%87%BB"><span class="nav-number">3.2.1.</span> <span class="nav-text">三明治攻击</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MEV%E5%AF%B9%E7%BD%91%E7%BB%9C%E7%9A%84%E5%8D%B1%E5%AE%B3"><span class="nav-number">4.</span> <span class="nav-text">MEV对网络的危害</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%93%E8%A7%A3MEV%E9%87%8D%E7%BB%84%E9%A3%8E%E9%99%A9"><span class="nav-number">5.</span> <span class="nav-text">缓解MEV重组风险</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%B8%8E%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.1.</span> <span class="nav-text">项目与服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E6%8A%80%E6%9C%AF%E6%89%8B%E6%AE%B5%E6%9D%A5%E9%81%BF%E5%85%8DMEV"><span class="nav-number">6.</span> <span class="nav-text">如何使用技术手段来避免MEV</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E4%BF%A1%E5%BC%8F%E7%A1%AC%E4%BB%B6%EF%BC%88Trusted-Hardware%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">可信式硬件（Trusted Hardware）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E9%94%81%E5%8A%A0%E5%AF%86%EF%BC%88TimeLock-Encryption%EF%BC%89"><span class="nav-number">6.2.</span> <span class="nav-text">基于时间锁加密（TimeLock Encryption）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%A8%E9%99%90%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F-Threshshold-Encryption"><span class="nav-number">6.3.</span> <span class="nav-text">门限密码系统 Threshshold Encryption</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2"><span class="nav-number">7.</span> <span class="nav-text">探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86"><span class="nav-number">7.1.</span> <span class="nav-text">同态加密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E7%9F%A5%E8%AF%86%E8%AF%81%E6%98%8E"><span class="nav-number">7.2.</span> <span class="nav-text">零知识证明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E7%9F%A5%E8%AF%86%E8%AF%81%E6%98%8E%E4%B8%8EdApp"><span class="nav-number">7.3.</span> <span class="nav-text">零知识证明与dApp</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE-2"><span class="nav-number">8.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wanyvic"
+      src="/images/ProfilePhoto.PNG">
+  <p class="site-author-name" itemprop="name">wanyvic</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanyvic" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wanyvic" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:q873040807@gmail.com" title="E-Mail → mailto:q873040807@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdn.jsdelivr.net/npm/@creativecommons/vocabulary@2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/wanyvic" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wanyvic.github.io/posts/60c92d46/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ProfilePhoto.PNG">
+      <meta itemprop="name" content="wanyvic">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wanyvicの博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MEV 矿工可提取价值分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-10 15:24:55" itemprop="dateCreated datePublished" datetime="2022-03-10T15:24:55+08:00">2022-03-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+    <span class="post-meta-item-icon">
+      <i class="far fa-comment"></i>
+    </span>
+    <span class="post-meta-item-text">Waline：</span>
+  
+    <a title="waline" href="/posts/60c92d46/#waline-comments" itemprop="discussionUrl">
+      <span class="post-comments-count waline-comment-count" id="/posts/60c92d46/" data-xid="/posts/60c92d46/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="什么是MEV"><a class="header-anchor" href="#什么是MEV"> </a>什么是MEV</h1>
+<p><code>MEV</code>是矿工可提取价值（<code>Miner Extractable Value</code>）的缩写。由于区块链并没有要求矿工对交易打包顺序做出强制要求，矿工是可以自主选择对内存池中的待处理交易进行重新排序，由此矿工从用户那里获得了额外的利润，这部分利润价值就被称为<code>MEV</code>。</p>
+<p><code>DeFi</code>的兴起。<code>MEV</code>价值呈指数增长。</p>
+<p><img src="/posts/60c92d46/MEV%E4%BB%B7%E5%80%BC%E5%9B%BE2.png" alt><br>
+浏览器链接：<a target="_blank" rel="noopener" href="https://explore.flashbots.net/">https://explore.flashbots.net/</a></p>
+<h1 id="存在的角色"><a class="header-anchor" href="#存在的角色"> </a>存在的角色</h1>
+<h2 id="矿工"><a class="header-anchor" href="#矿工"> </a>矿工</h2>
+<p>矿工是工作量证明机制的核心。矿工的工作任务是将用户发来的交易进行打包，并通过工作量证明提交到区块链上。</p>
+<p>矿工可以在不影响交易原子正确的前提下对多笔交易进行排序、包含、剔除等操作。</p>
+<p>通常来说，矿工为了寻求利润最大化会将<strong>待打包的交易</strong>交易按照<code>gas price</code>进行排序。然后将最前面的<code>N</code>笔交易进行打包入块。</p>
+<p>当然出于某些场景需求，矿工也可以按照他们想要的交易顺序进行打包。比如矿池定制化交易加速功能、对异常地址进行风险控制等等。例如：<br>
+<a target="_blank" rel="noopener" href="https://pushtx.btc.com/">比特大陆交易加速服务</a></p>
+<p><img src="/posts/60c92d46/memorypool2.png" alt></p>
+<h2 id="套利机器人"><a class="header-anchor" href="#套利机器人"> </a>套利机器人</h2>
+<p>虽然现在常用的说法是“矿工可提取价值”，但实际上大多数<code>MEV</code>行为是由第三方机器人，而非矿工，发起的。这些机器人通过提高支付给矿工的交易费来操纵区块中的交易排序。这意味着就算矿工仅按照<code>gas price</code>高低排序交易，也会出现<code>MEV</code>问题。然而，<code>MEV</code>还可以被视作是矿工可以提取的最大价值上限，因为矿工是最终决定区块中交易顺序的一方。</p>
+<h1 id="如何套利"><a class="header-anchor" href="#如何套利"> </a>如何套利</h1>
+<h2 id="有利的套利"><a class="header-anchor" href="#有利的套利"> </a>有利的套利</h2>
+<p>如果套利发生在「世界状态」发生之后，套利机器人对市场变化作出的合理的反馈。那么这种套利即是合理的套利。</p>
+<h3 id="搬砖套利-2"><a class="header-anchor" href="#搬砖套利-2"> </a>搬砖套利</h3>
+<p>用户在交易平台进行了一笔大额交易导致价格下滑，产生了较大的套利空间。套利机器人进行套利交易，将市场价格套利至真实价格水平。此类型的提取<code>MEV</code>大多是发生在链上事务发生后，套利机器人对市场进行反应，不会损害原始交易者的利益。<br>
+txid:<a target="_blank" rel="noopener" href="https://etherscan.io/tx/0xb72689042f313adbffbe4d192b0febc4c8a8346b75a549d5b4d4795b37180488">0xb72689042f313adbffbe4d192b0febc4c8a8346b75a549d5b4d4795b37180488</a></p>
+<h3 id="清算机器人套利"><a class="header-anchor" href="#清算机器人套利"> </a>清算机器人套利</h3>
+<p>有些协议的运转需要依赖于<code>MEV</code>，比如对<code>Aave Protocol</code>、<code>MakerDAO</code>、<code>Compound</code>的清算。在<code>DeFi</code>抵押借贷协议中，当抵押物价值下降时，如果没有补足或者出售抵押资产，就会触发清算程序。清算人可以以低于市场价格3%-5%的折扣，获得如<code>ETH</code>这样的抵押资产，而这3%-5%的折扣价值，就是<code>MEV</code>。</p>
+<h2 id="有害的套利"><a class="header-anchor" href="#有害的套利"> </a>有害的套利</h2>
+<p>如果套利发生在「世界状态」改变之前，即机器人有预知「世界状态」改变的能力，那么这种操作会危害于区块链上的正常参与者。</p>
+<h3 id="三明治攻击"><a class="header-anchor" href="#三明治攻击"> </a>三明治攻击</h3>
+<p>试想下，如果我们有能力在大资金买卖交易前后各插入一笔交易（买在低点，卖在高点）岂不是是一个稳赚不赔的策略？</p>
+<p>如图所示，套利机器人过程主要分以下4个阶段。</p>
+<p><img src="/posts/60c92d46/DEX%E5%A5%97%E5%88%A9%E7%A4%BA%E6%84%8F%E5%9B%BE2.png" alt></p>
+<ul>
+<li>阶段一：用户创建大额买单交易并进行广播，此时交易在内存池中未打包入块。</li>
+<li>阶段二：套利机器人从交易内存池中捕获到用户交易，计算交易可套利价值空间，构造两笔交易进行广播。一笔以高于用户<code>gas price</code>创建买单进行广播，另一笔以低于用户<code>gas price</code>创建一笔卖单。</li>
+<li>阶段三：交易机器人买单先成交，随后用户交易成功打包入块，价格拉升。</li>
+<li>阶段四：价格拉升后，交易机器人卖单成功打包入块，完成套利。</li>
+</ul>
+<p>矿工与套利机器人的收益来源是用户损失的部分。</p>
+<h1 id="MEV对网络的危害"><a class="header-anchor" href="#MEV对网络的危害"> </a>MEV对网络的危害</h1>
+<ul>
+<li>
+<p>拉高手续费：当<code>DeFi</code>各类资产价格发生波动，可套利的机会与利润空间也越来越多。机器人纷纷抬高<code>gas price</code>来争抢这笔利润，短时间使手续费价格巨增。</p>
+</li>
+<li>
+<p>增加无效交易数量：<code>MEV</code>最终只会有一笔交易可以成功套利，其他的都会以失败告终。这些无效的交易也会像垃圾一样占用区块链的空间。</p>
+</li>
+<li>
+<p>损害用户利益：套利机器人为了争抢套利机会，往往会抬高交易费，支付的交易费往往占套利所得收益的很大比例，而这些交易费最终直接落入了矿工的口袋。也就是说，虽然矿工没有亲自开展套利交易，但仍是这类<code>MEV</code>行为的最大受益者。</p>
+</li>
+<li>
+<p>区块链频繁重组风险：对于矿工来说，如果<code>MEV</code>的价值远大于重组区块带来的损失。那么众多矿工都会尝试对不利于自己的区块进行重组。这导致的后果包括：交易确认时间变长，用户在平台的体验下降；增加了51%算力攻击的可能性。</p>
+</li>
+</ul>
+<p><strong>MEV本质上是个零和游戏，损失的是链上用户，受益的是矿工和套利者。</strong></p>
+<h1 id="缓解MEV重组风险"><a class="header-anchor" href="#缓解MEV重组风险"> </a>缓解MEV重组风险</h1>
+<ul>
+<li>额外的安全性激励：除了区块奖励之外(如<code>EIP-1559</code>提议销毁的<code>BaseFee</code>，或状态租金)，稳定的矿工收入来源是对协议安全的补充，并可以帮助缓解<code>MEV</code>问题。</li>
+<li>最终确定性 (<code>Finality</code>)：工作量证明 (<code>PoW</code>) 只有概率上的最终确定性。而基于拜占庭容错的算法（<code>BFT</code>）更能保证最终确定性，并且仅仅重组单个被敲定的区块就需要程度更深的合谋，该算法使得时间盗贼攻击更加困难。然而，如果<code>MEV</code>的激励足够高，那么即使合谋的难度较高也值得尝试了。再者，参与者对于其提议的区块，仍然有权任意排序交易，因此仅凭最终确定性无法解决“一般”的抢跑交易问题。</li>
+<li>权益证明 (<code>Proof-of-Stake</code>)：基于新一代<code>PoS</code>的区块链（<code>Casper FFG</code>、<code>Tendermint</code>）中，尝试重组的验证者会遭受罚没惩罚，因此使得时间盗贼攻击成本更高，尤其是与最终确定性结合时。然而，只要<code>MEV</code>的激励足够高，即使在罚没惩罚的警示下也可能会捕获<code>MEV</code>。</li>
+</ul>
+<p>以上方案在一定程度上缓解了矿工为了利益频繁重组区块带来的风险，但是对于套利机器人并无作用。</p>
+<h2 id="项目与服务"><a class="header-anchor" href="#项目与服务"> </a>项目与服务</h2>
+<ul>
+<li><code>Flashbots</code>：是一家旨在降低由矿工可提取价值 (<code>MEV</code>) 对智能合约公链构成负外部性影响和存在风险的研发机构，该机构希望为智能合约公链打造一个无需许可、透明、公平的生态系统。（<code>mev-geth</code>和<code>mev-relay</code>）。他们的密封投标拍卖模型允许任何人通过贿赂提交交易，从而减轻以太坊网络的压力并减少矿工为最大化<code>MEV</code>所需的串通数量。对于同一笔套利只有一笔交易能够通过<code>mev-relay</code>下发给矿工，从而缓解了网络的拥堵以及手续费的水涨船高。但是并没有解决普通用户的三明治攻击问题。<br>
+<img src="/posts/60c92d46/flashbots.png" alt></li>
+<li><code>Taichi Network</code>：由目前以太坊算力第二大矿池星火矿池创立，用户可以通过太极网络提供的接口直接发送交易到星火矿池的隐私池。由于星火矿池并不对这笔交易进行网络公开发布，这笔被发送出去的交易在未被正式确认前，在<code>Etherscan</code>上无法看到该笔交易的状态。</li>
+<li><code>bloXroute</code>：提供隐私通信功能，允许交易在不被暴露的情况下直接到达矿工手中。<code>bloXroute</code>的<code>BDN</code>（区块链分发网络）通过自己的网关软件将区块链节点与<code>BDN</code>链接，网关软件和区块链节点首先翻译从区块链进入<code>BDN</code>的信息。然后，在第二层，它会进行区块压缩。通过极大缩小区块大小，使其随后更高效地在区块链分发网络（<code>BDN</code>）中发送/传输。</li>
+</ul>
+<p>以上方案都在一定程度上解决了套利机器窥视内存池交易所带来的「抢跑」，但无法解决矿工本身套利的问题。</p>
+<h1 id="如何使用技术手段来避免MEV"><a class="header-anchor" href="#如何使用技术手段来避免MEV"> </a>如何使用技术手段来避免MEV</h1>
+<p>思路是：交易可以在<code>memory pool</code>存储池中加密，并在排序完成后解密。这样任何人在交易定序前都不知道交易的内部细节。</p>
+<h2 id="可信式硬件（Trusted-Hardware）"><a class="header-anchor" href="#可信式硬件（Trusted-Hardware）"> </a>可信式硬件（Trusted Hardware）</h2>
+<p><code>SGX</code>代表<code>Software Guard eXtensions</code>，这是一个提供硬件内存加密的指令集，其中特定的代码和数据被隔离在「飞地」中，它们可以在不暴露于外部代码的情况下运行。</p>
+<p>它以如下流程运行:</p>
+<ul>
+<li>每个矿工都有一个<code>SGX</code>，他们有一个协议，用于共享只有在<code>SGX</code>中才能访问的加密密钥。</li>
+<li>所有<code>p2p</code>内的交易都需要通过<code>SGX</code>内给定的公钥进行加密。</li>
+<li><code>SGX</code>内部可以解密并验证交易的合法性，并构造一个<code>pending block</code>，并将<code>block hash</code>发送给外部用于<code>PoW</code>计算。</li>
+<li>外部计算出<code>PoW</code>值后提交给<code>SGX</code>，<code>SGX</code>验证合法后将完整区块返还给外部进行广播。</li>
+</ul>
+<p>优点：可以不用修改现有协议，<code>SGX</code>可以作为一个选项，添加到现有协议中。<br>
+缺点：虽然解决了交易内存池的可见性，抵挡了外部机器人对<code>memory pool</code>的窥视，但是对于矿工来说。如果<code>MEV</code>的价值远远大于报块可获得的奖励，矿工将在解密交易后重新<code>rehash</code>（非确定性共识下，例如<code>PoW</code>)。并且<code>SGX</code>依赖<code>intel</code>的指令集，并不能保证绝度安全。如果当利益足够大的情况下，某人通过<code>SGX</code>的漏洞找到私钥这个系统就不能运行了。</p>
+<h2 id="基于时间锁加密（TimeLock-Encryption）"><a class="header-anchor" href="#基于时间锁加密（TimeLock-Encryption）"> </a>基于时间锁加密（TimeLock Encryption）</h2>
+<p>代表：<code>STARKware’s Veedo</code><br>
+将交易进行加密后到内存池中，由矿工将加密后的交易打包到区块链上（事务为执行），同时将私钥通过例如<code>VDF</code>（<a target="_blank" rel="noopener" href="https://blog.priewienv.me/post/verifiable-delay-function-1/">可验证延迟函数</a>)等方式，交由矿工进行延迟解密。<code>N</code>个块后矿工成功解密，将解密后的交易和<code>Proof</code>提交到区块链上进行验证，此时事务将真正执行。</p>
+<ul>
+<li>所有的交易都需要加密，任何人都可以在<code>X</code>个计算周期后完成解密。</li>
+<li>矿工将在加密交易上链后<code>N</code>区块开始解密，并在<code>N+X</code>区块后完成解密并提交到区块链上。</li>
+<li>矿工必须在<code>N+Y（Y&gt;X）</code>个区块之前完成解密交易的上链，否则交易将失效。</li>
+</ul>
+<p>流程如下：</p>
+<ul>
+<li>
+<p>用户将经过同态隐藏的信息（可能是<code>hash</code>）交给矿工进行打包。<br>
+<img src="/posts/60c92d46/TimeLock1.png" alt></p>
+</li>
+<li>
+<p>矿工成功将数据写入区块。<br>
+<img src="/posts/60c92d46/TimeLock2.png" alt></p>
+</li>
+<li>
+<p>矿工对<code>VDF</code>进行解密（<code>VDF</code>保证在<code>N</code>个块之后才能解开），同时产生新的区块。<br>
+<img src="/posts/60c92d46/TimeLock3.png" alt></p>
+</li>
+<li>
+<p><code>N</code>个块后，矿工解开交易生成解密后的交易和一个<code>Proof</code>，合约验证<code>Proof</code>的合法性再将解密后的数据写入区块链。<br>
+<img src="/posts/60c92d46/TimeLock4.png" alt></p>
+</li>
+</ul>
+<p><strong>缺点：</strong> 所有的交易都得过这套系统，不能作为一个选项。并且交易有延迟对用户体验不好。有一个风险是当加密的交易不能及时上链，交易被解密。<br>
+<strong>优点：</strong> 对共识时间影响较小。矿工不需要花费额外的精力去处理交易解密本身。</p>
+<h2 id="门限密码系统-Threshshold-Encryption"><a class="header-anchor" href="#门限密码系统-Threshshold-Encryption"> </a>门限密码系统 Threshshold Encryption</h2>
+<p>代表：<code>ChainLink FSS</code><br>
+一种门限密码系统，该领域的基础门限密码学，是密码系统通过对信息进行加密并将其分发到容错计算机群集中来保护信息。该消息使用公钥，并且对应的私钥是共享参与方之间。使用阈值密码系统时，为了解密加密的消息或对消息进行签名，必须有多个参与方（超过某个阈值编号）进行解密或签名协议。</p>
+<p>在<code>Tendermint</code>中，事务的执行在链上包含区块之后在块中进行。<br>
+每个验证器都有一份<code>BLS</code>门限解密密钥。任何2/3验证器可以使用这个密钥去解密一部分交易数据。<br>
+通过验证程序对<code>Tendermint</code>投票的时候必须包含对应部分解密数据的份额，交易的解密与共识最终状态的生成是同步进行的，即在没有最终确定块的情况下无法解密交易；如果交易不可解密，则无法最终确定块。</p>
+<p><strong>缺点：</strong> 在<code>mempool</code>中，为了支付解密手续费，有些数据无法加密。这里需要知道哪个帐户发送的交易，从而泄漏可以用作<code>MEV</code>边缘的信息。通过使用零知识证明使数据链上隐私，隐藏手续费的资金来源。必须使用泛拜占庭容错作为共识算法。</p>
+<h1 id="探索"><a class="header-anchor" href="#探索"> </a>探索</h1>
+<h2 id="同态加密"><a class="header-anchor" href="#同态加密"> </a>同态加密</h2>
+<p>同态加密体系大致上被分为四类：部分同态、近似同态加密、有限级数全同态与完全同态。</p>
+<ul>
+<li>加法同态：<code>E(X)+E(Y) = E(X+Y)</code></li>
+<li>乘法同态：<code>E(X)E(Y) = E(XY)</code></li>
+</ul>
+<p>满足上述两个公式的特性是全同态，满足期中之一就是半同态。</p>
+<p>通俗来说，<strong>对原文的逻辑运算等于对密文的逻辑运算的解密</strong>。理论上所有的算术运算都可以归纳为加法和乘法。</p>
+<h2 id="零知识证明"><a class="header-anchor" href="#零知识证明"> </a>零知识证明</h2>
+<p>定义：</p>
+<ul>
+<li><code>Succinct</code>：简洁，证明的数据量比较小。</li>
+<li><code>Non-interactive</code>：非交互，没有或者只有很少交互。</li>
+<li><code>ARguments</code>：论证，讨论这些证明的一种形式主义，因为有一些花哨的密码学和非确定性并不能完全构成传统意义上的这些“形式证明”。</li>
+<li><code>Knowledge</code>：知识，对于证明者来说在不知道证据（<code>witness</code>，比如一个哈希函数的输入或者一个确定<code>Merkle-tree</code>节点的路径）的情况下，构造出一组参数和证明是不可能的。<br>
+零知识证明的目标是让验证者相信证明者拥有某个秘密(<code>withness</code>)，满足某种关系，而无需向验证者或其他任何人透露秘密本身。</li>
+</ul>
+<h2 id="零知识证明与dApp"><a class="header-anchor" href="#零知识证明与dApp"> </a>零知识证明与dApp</h2>
+<p>在现有的基于零知识证明的区块链系统，一般有如下角色：证明者（<code>Prover</code>）和验证者（<code>Verifier</code>）<br>
+运用零知识证明系统我们可以轻松的用算术电路构建<code>dApp</code>（例如在：<code>starkware</code>、<code>aleo</code>上开发<code>dApp</code>），用户执行<code>dApp</code>，会生成<code>Output</code>和<code>Proof</code>。验证者不需要对交易本身进行<code>re-execution</code>（重放式验证），取而代之的是通过验证生成的<code>Proof</code>的正确性（<code>Proof</code>非常简洁，验证十分快速），即可保证<code>Output</code>的正确性（一定是按照<code>dApp</code>逻辑运行的）又可使验证复杂度与代码复杂度解藕。随后将<code>Output</code>提交到链上，逻辑代码处理链下化，链上只需要做状态数据通过<code>Verifier</code>检验后进行更改。极大的提升了链上处理数据的能力。</p>
+<p>至此在理想情况下，我们可以使用零知识证明构建的<code>dApp</code>部署在服务器上。使用同态加密将私密数据进行加密，并在<code>dApp</code>中进行同态加密运算。将结果数据存储在区块链或链下的<code>DHT</code>中。<br>
+注：当不使用第三方<code>Prover</code>甚至不需要同态加密来做计算。<code>Proof</code>本身已经相当于隐私过了。<br>
+<img src="/posts/60c92d46/aexe.png" alt></p>
+<h1 id="参考文献-2"><a class="header-anchor" href="#参考文献-2"> </a>参考文献</h1>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.zvstus.com/article/news/1/75d87ffffe84382c25d6d2d1c0f50000.html">https://www.zvstus.com/article/news/1/75d87ffffe84382c25d6d2d1c0f50000.html</a><br>
+<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=Hnw_tMGNx3A">https://www.youtube.com/watch?v=Hnw_tMGNx3A</a><br>
+<a target="_blank" rel="noopener" href="https://docs.google.com/presentation/d/1tQEUpZjy_U9J-VQAx1Wf5W9oOX5rrCY3AwjAb7ZgA68/edit#slide=id.p">https://docs.google.com/presentation/d/1tQEUpZjy_U9J-VQAx1Wf5W9oOX5rrCY3AwjAb7ZgA68/edit#slide=id.p</a><br>
+<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1Ti4y1L7Ur">https://www.bilibili.com/video/BV1Ti4y1L7Ur</a><br>
+<a target="_blank" rel="noopener" href="https://medium.com/starkware/presenting-veedo-e4bbff77c7ae">https://medium.com/starkware/presenting-veedo-e4bbff77c7ae</a><br>
+<a target="_blank" rel="noopener" href="https://wanyvic.cn/posts/a5f2eb4">https://wanyvic.cn/posts/a5f2eb4</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/flashbots/pm">https://github.com/flashbots/pm</a><br>
+<a target="_blank" rel="noopener" href="https://reading.supply/@whyrusleeping/a-vdf-explainer-5S6Ect">https://reading.supply/@whyrusleeping/a-vdf-explainer-5S6Ect</a><br>
+<a target="_blank" rel="noopener" href="https://www.onlyalt.com/blog/mev-miner-extractable-value">https://www.onlyalt.com/blog/mev-miner-extractable-value</a><br>
+<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=o08E4gx9TqA">https://www.youtube.com/watch?v=o08E4gx9TqA</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>wanyvic
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://wanyvic.github.io/posts/60c92d46/" title="MEV 矿工可提取价值分析">https://wanyvic.github.io/posts/60c92d46/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MEV/" rel="tag"><i class="fa fa-tag"></i> MEV</a>
+              <a href="/tags/%E7%9F%BF%E5%B7%A5%E5%8F%AF%E6%8F%90%E5%8F%96%E4%BB%B7%E5%80%BC/" rel="tag"><i class="fa fa-tag"></i> 矿工可提取价值</a>
+              <a href="/tags/%E9%9B%B6%E7%9F%A5%E8%AF%86%E8%AF%81%E6%98%8E/" rel="tag"><i class="fa fa-tag"></i> 零知识证明</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/a5f2eb4/" rel="prev" title="探索全同态加密">
+                  <i class="fa fa-chevron-left"></i> 探索全同态加密
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/487c3c24/" rel="next" title="StarkWare 分析">
+                  StarkWare 分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="waline-comments"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wanyvic</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">113k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:43</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdn.jsdelivr.net/npm/pdfobject@2.2.7/pdfobject.min.js","integrity":"sha256-ph3Dk89VmuTVXG6x/RDzk53SU9LPdAh1tpv0UvnDZ2I="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.13.10/dist/mermaid.min.js","integrity":"sha256-CmZCFVnvol9YL23PfjDflGY5nJwE+Mf/JN+8v+tD/34="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" integrity="sha256-94CNZ/bJtwrBYZrXhCOBvpB4rZUzBnvAsirFv31TMGo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.css" integrity="sha256-+oItviPaTmqjDhk4y4fLLUIMgRQYDV/ZyrRNvQiebWM=" crossorigin="anonymous">
+  <script class="next-config" data-name="katex" type="application/json">{"copy_tex_js":{"url":"https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.js","integrity":"sha256-etSqbSVF4+Lwe8MGk/Vanc1sR+mWv+qOG73fxWw9p94="}}</script>
+  <script src="/js/third-party/math/katex.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.2.0/dist/quicklink.umd.js" integrity="sha256-4kQf9z5ntdQrzsBC3YSHnEz02Z9C1UeW/E9OgnvlzSY=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://wanyvic.github.io/posts/60c92d46/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="waline" type="application/json">{"lang":"zh-cn","enable":true,"serverURL":"https://waline-kappa-three.vercel.app","placeholder":"发表评论~","avatar":"wavatar","pageSize":10,"visitor":false,"comment_count":true,"requiredFields":["nick"],"meta":["nick","mail","link"],"libUrl":"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/weibo","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/bilibili","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/qq"],"el":"#waline-comments","path":"/posts/60c92d46/"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.waline.el).then(() => 
+    NexT.utils.getScript(CONFIG.waline.libUrl, { condition: window.Waline })
+  ).then(() => {
+    new Waline(CONFIG.waline);
+  });
+});
+</script><div class="moon-menu">
+  <div class="moon-menu-items">
+    
+    <div id="moon-menu-item-back2bottom" class="moon-menu-item" onclick="back2bottom()">
+      <i class='fa fa-chevron-down'></i>    </div>
+    
+    <div id="moon-menu-item-back2top" class="moon-menu-item" onclick="back2top()">
+      <i class='fa fa-chevron-up'></i>    </div>
+    
+  </div>
+  <div class="moon-menu-button">
+    <svg class="moon-menu-bg">
+      <circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle>
+      <circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle>
+    </svg>
+    <div class="moon-menu-content">
+      <div class="moon-menu-icon"><i class='fas fa-ellipsis-v'></i></div>
+      <div class="moon-menu-text"></div>
+    </div>
+  </div>
+</div><script src="/js/injector.js"></script>
+</body>
+</html>

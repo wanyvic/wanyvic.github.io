@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/corgi_32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/corgi_16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="l0k1Y36UcsrN3dPCcAYthwLa5h11Gn8uU_6590PS-LM">
+  <meta name="baidu-site-verification" content="code-XQEfkj505K">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"wanyvic.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.10.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="Casper共识机制 Casper 实现有助于改变以太坊生态系统。其中两个项目的实现分别是 Friendly Finality Gadget (Casper FFG) 和 Correct-by-Construction(Casper CBC)。 Casper FFG 是由以太坊创始人 Vitalik Buterin创立的。Casper FFG 是 Casper 的最初版本，是 PoW&#x2F;PoS的混">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ETH2.0 Specs">
+<meta property="og:url" content="https://wanyvic.github.io/posts/8a7d387/index.html">
+<meta property="og:site_name" content="Wanyvicの博客">
+<meta property="og:description" content="Casper共识机制 Casper 实现有助于改变以太坊生态系统。其中两个项目的实现分别是 Friendly Finality Gadget (Casper FFG) 和 Correct-by-Construction(Casper CBC)。 Casper FFG 是由以太坊创始人 Vitalik Buterin创立的。Casper FFG 是 Casper 的最初版本，是 PoW&#x2F;PoS的混">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-24T09:53:11.000Z">
+<meta property="article:modified_time" content="2021-10-24T09:53:11.000Z">
+<meta property="article:author" content="wanyvic">
+<meta property="article:tag" content="区块链">
+<meta property="article:tag" content="ETH2.0">
+<meta property="article:tag" content="Casper">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://wanyvic.github.io/posts/8a7d387/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://wanyvic.github.io/posts/8a7d387/","path":"posts/8a7d387/","title":"ETH2.0 Specs"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ETH2.0 Specs | Wanyvicの博客</title>
+  
+
+
+
+
+<link rel="dns-prefetch" href="https://waline-kappa-three.vercel.app"><link rel="stylesheet" type="text/css" href="/css/injector/main.css" /><link rel="preload" as="style" href="/css/injector/light.css" /><link rel="preload" as="style" href="/css/injector/dark.css" />
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Wanyvicの博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">区块链攻城狮</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">49</span></a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">4</span></a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">42</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Casper%E5%85%B1%E8%AF%86%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">Casper共识机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E7%89%87%E6%8A%80%E6%9C%AF"><span class="nav-number">2.</span> <span class="nav-text">分片技术</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EVM-2-0%E8%99%9A%E6%8B%9F%E6%9C%BAeWASM"><span class="nav-number">3.</span> <span class="nav-text">EVM 2.0虚拟机eWASM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E5%A6%82%E4%BD%95%E8%B7%A8%E5%88%86%E7%89%87%E8%B0%83%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">智能合约如何跨分片调用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">5.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="wanyvic"
+      src="/images/ProfilePhoto.PNG">
+  <p class="site-author-name" itemprop="name">wanyvic</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">49</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wanyvic" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wanyvic" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:q873040807@gmail.com" title="E-Mail → mailto:q873040807@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdn.jsdelivr.net/npm/@creativecommons/vocabulary@2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/wanyvic" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wanyvic.github.io/posts/8a7d387/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/ProfilePhoto.PNG">
+      <meta itemprop="name" content="wanyvic">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wanyvicの博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ETH2.0 Specs
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-24 17:53:11" itemprop="dateCreated datePublished" datetime="2021-10-24T17:53:11+08:00">2021-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+    <span class="post-meta-item-icon">
+      <i class="far fa-comment"></i>
+    </span>
+    <span class="post-meta-item-text">Waline：</span>
+  
+    <a title="waline" href="/posts/8a7d387/#waline-comments" itemprop="discussionUrl">
+      <span class="post-comments-count waline-comment-count" id="/posts/8a7d387/" data-xid="/posts/8a7d387/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Casper共识机制"><a class="header-anchor" href="#Casper共识机制"> </a>Casper共识机制</h1>
+<p>Casper 实现有助于改变以太坊生态系统。其中两个项目的实现分别是 Friendly Finality Gadget (Casper FFG) 和 Correct-by-Construction(Casper CBC)。</p>
+<p>Casper FFG 是由以太坊创始人 Vitalik Buterin创立的。Casper FFG 是 Casper 的最初版本，是 PoW/PoS的混合版。然而，由 Vlad Zamfir 创立的 Casper CBC 已经制定了被广泛认为是一种卓越的协议。</p>
+<p>ETH2.0 最终采用Vitalik 的 Casper FFG共识协议。</p>
+<p>ETH2.0信标链(Beacon chain) 采用Casper共识机制，Casper属于权益证明制（PoS）范畴，除了继承PoS机制低能耗、防51%攻击更安全的优势外，还在现有PoS机制上增加经济惩罚机制，解决PoS机制本身存在的“无利害攻击”问题。</p>
+<p>“无利害攻击”是PoS系统的一个经典攻击问题。PoS系统节点持有权益证明（即按币的数量）就可以参与挖矿，权益占比越大负责出块的概率也越大，由于PoS不需要额外付出挖矿的算力成本，挖矿边际成本为0，区块链网络产生分叉的可能性更高。PoS验证者可以选择同时在两条链上进行“投票”，不论最后哪条链成为“最长链”胜出，验证节点都可以获得区块奖励。这和PoW链不同，如图4所示，PoW链不会发生这种现象，因为算力只有一份，而Token同时存在在两条链上。随着时间推移，这种无成本为多条链出块的投票行为会助长更多的网络安全攻击行为，损伤区块链网络本身的安全性。</p>
+<p>Casper通过设置惩罚经济模型来解决PoS的无成本攻击问题，确保网络可以正常运转。它的主要机制包括：</p>
+<ol>
+<li>
+<p>验证节点需要预先在链上抵押锁定一定数量的以太坊（BETH）作为保证金。</p>
+</li>
+<li>
+<p>验证节点每一轮需要对区块进行“下注”，验证节点需要评估其他节点会“下注”哪个块胜出，同时也“下注”这个块。如果支持正确的链就可以拿回保证金外加区块奖励及区块内的交易Gas费；如果下注没有迅速达成一致，就只能拿回保证金。如果验证节点明显地改变下注，进行“投机下注”，比如先投某个块有很高概率胜出，再投另外一个块，将被信标链严惩, 最坏结果就是没收全部保证金，并从验证节点委员会中剔除，同时验证节点也可以监督其他节点的投注并举报此类投机行为。由于可能造成的经济损失，验证节点会选择对自己最有利的结果进行投注，当全网验证节点数量足够多时，投注机制确保最后的结果分布趋向于收敛，即大多数验证节点都选择的某个高概率胜出的区块作为最终一致性结果。</p>
+</li>
+<li>
+<p>Casper验证节点委员会随机选举验证节点，每隔一个周期进行一次轮换选举，随机指派验证节点负责指定分片内的校验区块出块，确保分片内的验证节点不形成“合谋”，降低网络安全性。</p>
+</li>
+</ol>
+<p>Casper PoS的基本思路是正向奖励诚信、负向惩罚作恶，所以对于验证节点设置非常多的惩罚规则来防止分叉，对于不尽责的验证节点，也存在惩罚保证金的风险。成为Casper 验证节点需要在ETH PoW主链上注册的验证管理器合约上至少质押32个BETH才能运行信标链节点客户端软件。</p>
+<p>考虑前期ETH矿工从PoW节点转为PoS验证节点参与度可能低于预期，Vitalik主导了Casper FFG这个PoW/PoS混合挖矿方案，在现有以太坊PoW协议上叠加一层PoS协议，在PoS协议正式稳定前维持PoW挖矿不变，但每通过PoW挖矿产生50个区块触发一次PoS节点区块验证，这样做方便让社区一部分用户可以先参与新PoS链的测试，直到社区顺利过渡到纯PoS主网。</p>
+<p>Casper 还有一个纯PoS的竞争版本实现Casper CBC, 由Vlad Zamfir主导，和FFG采用的混合共识不同，CBC从一开始就完全定义成PoS链，理论创新较多，实际部署难度高于FFG，可能ETH2.0不会直接采用。CBC和FFG的目标是一致的，即提高整个区块链系统共识的安全性。技术思想方面，CBC更倾向通过新的共识改进BFT(拜占庭容错协议)不超过三分之一作恶节点数量的限制，容错率降到1/4。Vitalik Butterin主导的FFG更倾向如何将现有的BFT1/3容错协议更好地运用在信标链上。目前来看，Vitalik主导的FFG路线获得了胜出。</p>
+<p><strong>总结:</strong> merge阶段,ETH1.0 POW出块模式不变，在此基础上包装一层casper进行区块的二次确认，然后通过crosslink提交摘要信息至信标链。</p>
+<h1 id="分片技术"><a class="header-anchor" href="#分片技术"> </a>分片技术</h1>
+<p>分片技术（sharding）其实来源于一种传统概念扩容技术，它指将数据库分成若干片段，以增加处理效率。在区块链中，它指将区块链网络分成多个碎片，每个碎片中包含一定的节点，由这些节点分别处理每个碎片中的事务，以提高区块链整体的性能。</p>
+<p>因此，在ETH2.0升级中，以太坊将通过分片技术提高系统并发交易处理吞吐量水平。它将网络划分为64个分片（旧方案中曾预计采用1024个分片），每个分片处理网络中不同的交易，并处于独立的账户空间。</p>
+<p>每个分片内的交易结果将由信标链网络上的验证节点委员会指定的验证节点负责验证，验证节点不需要验证分片外的交易，分片每隔一段时间（即时隙Slot，12s）由验证节点产生一个校对区块, 校对区块包含分片内的状态和交易内容，提供可验证信息（如Merkle根）。这也意味着，每过12秒整个网络中就产生64个分片链区块，再加1个信标链区块。</p>
+<p>随后，通过交联（crosslink）过程，信标链可以引用不同分片链的内容和状态，获得该分片网络的真实性证明，而不需要去验证分片内每一笔交易，最终信标链验证委员会通过Casper机制对信标链内所有分片链进行校对，随后区块结果获得最终确定性，分片也将通过交联获得信标链对引用的分片区块完成最终确认的状态结果。</p>
+<p>ETH2.0将网络分成两部分，左边L1代表信标链网络，右边L2代表分片网络，分片之间空间各自独立，不同的分片由验证节点组成的验证委员会维护，相当于也是多条独立的区块链。信标链通过交联（crosslink）收集分片内的交易真实性证明摘要（Merkle根），ETH2.0分片技术第一阶段就是建立信标链-分片的锚定模型，分片内交易结果的确认要等待信标链的区块结果确认，分片内不支持状态存储。</p>
+<p>总结一下，ETH2.0分片技术的阶段1属于链上数据分片范畴，即只是将验证节点随机划分到不同的网络，处理不同的交易数据，分片未涉及处理状态的问题，ETH通过信标链这个核心中枢来负责最终交易状态的共识验证并在区块确认后在各个分片进行同步，信标链同时协调跨分片的状态通信，信标链基于Casper 共识来实现区块的更新, 通过交联技术实现信标链和分片的状态通信。</p>
+<h1 id="EVM-2-0虚拟机eWASM"><a class="header-anchor" href="#EVM-2-0虚拟机eWASM"> </a>EVM 2.0虚拟机eWASM</h1>
+<p>ETH2.0的阶段1“分片链”仍不支持智能合约，但是随着ETH2.0新虚拟机eWASM的推出，这一情况将被改变。新虚拟机推出后，分片链将可以执行智能合约，每个分片链管理一个eWASM，包括账户、合约代码、状态、收据、其他抽象等等，这些ETH1.0拥有的概念将迁移至分片链。这将发生在信标链和分片网络稳定运行之后，分片内增加对智能合约的支持会增加状态存储的开销，以及分片之间跨分片（状态）通信的复杂性。eWASM将应对分片内运行智能合约的挑战，这是可预见的趋势，分片内支持状态操作才能明显提高ETH扩容后的交易性能。</p>
+<p>eWASM是针对以太坊EVM推出的WebAssembly子集，EVM最初设计过程强调简单和安全，以保证智能合约运行结果的无歧义和正确性，所以EVM不支持数据类型方面精确度不确定的浮点计算。同时EVM只支持处理通用区块32位8字节数据，不支持64位。EVM本身支持的操作码也较少，只能支持有限的几种编程语言进行智能合约开发比如Solidity/Vyper，并不支持C/C++/Rust硬件及系统级别语言开发，Solidity本身语言在内存泄露、执行速度方面存在很多改进的地方。</p>
+<p>WebAssembly(简称WASM)的设计目标是性能和效率，是为Web开发构建的一个高效计算引擎（Web虚拟机），体系架构设计接近传统计算机，支持接近硬件水平的指令，性能非常好，其支持计算机CPU RSIC指令集使得Web应用程序能利用本地计算机的硬件功能提高代码的执行速度，所以兼容多种编程语言，软件代码更加易于阅读和调试，包括Google、Microsoft等传统互联网公司以及Polkadot、EOS、Cardano等知名区块链项目都在陆续采用WASM。</p>
+<p>eWASM是以太坊上的WASM, 向后兼容目前的EVM，不支持浮点数操作，其相比EVM最明显的优势是代码执行的速度和效率上的大幅提升，执行速度提升意味着区块每秒可以处理的交易数量TPS（吞吐量）提升，eWASM也支持更多的编程语言种类进行智能合约开发，这些编程语言相比Solidity具有更广泛的社区开发支持资源，包括编译工具、开发人员。</p>
+<p>eWASM还有一个“优化”的地方是用eWASM智能合约替代预编译，预编译是EVM字节码的特殊位，通常代表某些通用的特定操作比如签名和哈希计算，EVM评估预编码字节代替评估合约地址内的整段代码，可以减少执行代码的Gas费用，如果不通过预编译，EVM将评估智能合约地址整段代码，效率非常低，同时很多复杂的密码计算将导致很高的Gas成本，有可能超过区块的限制而导致交易无法处理。</p>
+<p>但是预编译存在一个缺点就是要如果加入新的操作字节码进行预编译，通常需要网络发生硬分叉，硬分叉因为有争议而较难实现。eWASM可以消除大多数当前的预编译，并用eWASM合约替换，这些智能合约可以通过重写和重新部署，而无需使用硬分叉，来增加更多新的通用操作，这使得eWASM比EVM更具优势。</p>
+<h1 id="智能合约如何跨分片调用"><a class="header-anchor" href="#智能合约如何跨分片调用"> </a>智能合约如何跨分片调用</h1>
+<p>分片链A智能合约内抛出链B的调用消息，经过信标链传播在链B完成调用。<br>
+此部分调用是异步的过程。</p>
+<h1 id="参考链接"><a class="header-anchor" href="#参考链接"> </a>参考链接</h1>
+<p><a target="_blank" rel="noopener" href="https://www.lianyi.cc/zixun/3197403">一文概述以太坊2.0的意义、时间表与未来生态演变</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>wanyvic
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://wanyvic.github.io/posts/8a7d387/" title="ETH2.0 Specs">https://wanyvic.github.io/posts/8a7d387/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"><i class="fa fa-tag"></i> 区块链</a>
+              <a href="/tags/ETH2-0/" rel="tag"><i class="fa fa-tag"></i> ETH2.0</a>
+              <a href="/tags/Casper/" rel="tag"><i class="fa fa-tag"></i> Casper</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/7c516f81/" rel="prev" title="Rust笔记(十) 泛型、trait与生命周期">
+                  <i class="fa fa-chevron-left"></i> Rust笔记(十) 泛型、trait与生命周期
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/408d5eb7/" rel="next" title="在确定性系统实现随机数-Randao机制">
+                  在确定性系统实现随机数-Randao机制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="waline-comments"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wanyvic</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">113k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:43</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdn.jsdelivr.net/npm/pdfobject@2.2.7/pdfobject.min.js","integrity":"sha256-ph3Dk89VmuTVXG6x/RDzk53SU9LPdAh1tpv0UvnDZ2I="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.13.10/dist/mermaid.min.js","integrity":"sha256-CmZCFVnvol9YL23PfjDflGY5nJwE+Mf/JN+8v+tD/34="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css" integrity="sha256-94CNZ/bJtwrBYZrXhCOBvpB4rZUzBnvAsirFv31TMGo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.css" integrity="sha256-+oItviPaTmqjDhk4y4fLLUIMgRQYDV/ZyrRNvQiebWM=" crossorigin="anonymous">
+  <script class="next-config" data-name="katex" type="application/json">{"copy_tex_js":{"url":"https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/copy-tex.min.js","integrity":"sha256-etSqbSVF4+Lwe8MGk/Vanc1sR+mWv+qOG73fxWw9p94="}}</script>
+  <script src="/js/third-party/math/katex.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.2.0/dist/quicklink.umd.js" integrity="sha256-4kQf9z5ntdQrzsBC3YSHnEz02Z9C1UeW/E9OgnvlzSY=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://wanyvic.github.io/posts/8a7d387/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="waline" type="application/json">{"lang":"zh-cn","enable":true,"serverURL":"https://waline-kappa-three.vercel.app","placeholder":"发表评论~","avatar":"wavatar","pageSize":10,"visitor":false,"comment_count":true,"requiredFields":["nick"],"meta":["nick","mail","link"],"libUrl":"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js","emoji":["https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/weibo","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/bilibili","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji","https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/qq"],"el":"#waline-comments","path":"/posts/8a7d387/"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.waline.el).then(() => 
+    NexT.utils.getScript(CONFIG.waline.libUrl, { condition: window.Waline })
+  ).then(() => {
+    new Waline(CONFIG.waline);
+  });
+});
+</script><div class="moon-menu">
+  <div class="moon-menu-items">
+    
+    <div id="moon-menu-item-back2bottom" class="moon-menu-item" onclick="back2bottom()">
+      <i class='fa fa-chevron-down'></i>    </div>
+    
+    <div id="moon-menu-item-back2top" class="moon-menu-item" onclick="back2top()">
+      <i class='fa fa-chevron-up'></i>    </div>
+    
+  </div>
+  <div class="moon-menu-button">
+    <svg class="moon-menu-bg">
+      <circle class="moon-menu-cricle" cx="50%" cy="50%" r="44%"></circle>
+      <circle class="moon-menu-border" cx="50%" cy="50%" r="48%"></circle>
+    </svg>
+    <div class="moon-menu-content">
+      <div class="moon-menu-icon"><i class='fas fa-ellipsis-v'></i></div>
+      <div class="moon-menu-text"></div>
+    </div>
+  </div>
+</div><script src="/js/injector.js"></script>
+</body>
+</html>
