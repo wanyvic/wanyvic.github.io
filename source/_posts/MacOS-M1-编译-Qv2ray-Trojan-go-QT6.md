@@ -1,5 +1,6 @@
 ---
 title: MacOS M1 编译 Qv2ray + Trojan-go + QT6
+abbrlink: aa6d79f4
 date: 2023-01-19 06:35:42
 updated: 2023-01-19 06:35:42
 tags:
